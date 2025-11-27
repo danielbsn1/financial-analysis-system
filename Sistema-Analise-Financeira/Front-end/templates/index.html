@@ -1,22 +1,126 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="static/styles.css">
-    <title>Análise Financeira</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <meta charset="utf-8" />
+    <title>Dashboard Financeiro Avançado</title>
+
+    <!-- Plotly (versão explícita) -->
+    <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/1.1.0/modern-normalize.min.css" />
+
+    <style>
+        body {
+            font-family: Inter, Arial, sans-serif;
+            margin: 20px;
+            background: var(--bg);
+            color: var(--fg);
+        }
+
+        :root {
+            --bg: #f5f7fb;
+            --fg: #111;
+            --card: #fff;
+            --muted: #666;
+        }
+        .dark {
+            --bg: #0f1724;
+            --fg: #e6eef8;
+            --card: #0b1220;
+            --muted: #9aa6ba;
+        }
+
+        .container { max-width: 1150px; margin: 0 auto; }
+        .card {
+            background: var(--card);
+            padding: 14px;
+            border-radius: 10px;
+            box-shadow: 0 6px 18px rgba(10,10,10,0.06);
+            margin-bottom: 18px;
+        }
+
+        .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+        label { font-size: 0.9rem; color:var(--muted); }
+        input[type="text"], input[type="date"], select {
+            padding:8px 10px; border-radius:6px; border:1px solid #ddd;
+            background: transparent; color: var(--fg);
+        }
+
+        button { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
+        .btn-primary { background:#2563eb; color:white; }
+        .btn-ghost { background:transparent; color:var(--fg); border:1px solid #ccc; }
+
+        #charts { display:grid; grid-template-columns:1fr; gap:12px; }
+        #precos, #volume, #rsi, #macd, #previsao { height: 420px; }
+
+        .small { font-size: 0.9rem; color:var(--muted); }
+    </style>
 </head>
 <body>
-    <h1>Análise Financeira</h1>
-    <input type="text" id="ticker" placeholder="Exemplo: AAPL, PETR4.SA" />
-    <button id="loadDataBtn">Carregar Dados</button>
-    <div id="error"></div>
-    <div id="stats"></div>
-    <div id="charts">
-        <div id="priceChart"></div>
-        <div id="returnChart"></div>
+<div class="container" id="page">
+    <div class="card">
+        <h2>📈 Dashboard Financeiro Avançado</h2>
+
+        <div class="controls">
+            <div>
+                <label>Ticker</label><br>
+                <input type="text" id="ticker" value="AAPL">
+            </div>
+
+            <div>
+                <label>Início</label><br>
+                <input type="date" id="start" value="2020-01-01">
+            </div>
+
+            <div>
+                <label>Fim</label><br>
+                <input type="date" id="end" value="">
+            </div>
+
+            <div>
+                <label>Horizonte (dias)</label><br>
+                <select id="horizon">
+                    <option value="7">7</option>
+                    <option value="30" selected>30</option>
+                    <option value="60">60</option>
+                </select>
+            </div>
+
+            <div>
+                <label>Indicadores</label><br>
+                <select id="indicator_select" multiple size="3" style="min-width:140px;">
+                    <option value="sma">SMA20 & SMA50</option>
+                    <option value="ema">EMA12 & EMA26</option>
+                    <option value="boll">Bollinger Bands</option>
+                    <option value="rsi">RSI</option>
+                    <option value="macd">MACD</option>
+                    <option value="atr">ATR</option>
+                    <option value="obv">OBV</option>
+                </select>
+            </div>
+
+            <div style="display:flex;flex-direction:column;gap:6px;">
+                <button class="btn-primary" onclick="buscarDados()">Buscar Dados</button>
+                <button class="btn-ghost" onclick="baixarExcel()">Download Excel</button>
+            </div>
+
+            <div style="margin-left:auto;">
+                <label>Tema</label><br>
+                <button onclick="toggleTheme()" class="btn-ghost">Toggle Dark</button>
+            </div>
+        </div>
+        <p class="small">Selecione múltiplos indicadores segurando Ctrl (ou Cmd) + clique.</p>
     </div>
-    <script src="static/app.js"></script>
+
+    <div id="charts">
+        <div class="card"><div id="precos"></div></div>
+        <div class="card"><div id="volume"></div></div>
+        <div class="card"><div id="rsi"></div></div>
+        <div class="card"><div id="macd"></div></div>
+        <div class="card"><div id="previsao"></div></div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
 </body>
 </html>
