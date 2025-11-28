@@ -6,55 +6,7 @@
 
     <!-- Plotly (versão explícita) -->
     <script src="https://cdn.plot.ly/plotly-2.35.0.min.js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/modern-normalize/1.1.0/modern-normalize.min.css" />
-
-    <style>
-        body {
-            font-family: Inter, Arial, sans-serif;
-            margin: 20px;
-            background: var(--bg);
-            color: var(--fg);
-        }
-
-        :root {
-            --bg: #f5f7fb;
-            --fg: #111;
-            --card: #fff;
-            --muted: #666;
-        }
-        .dark {
-            --bg: #0f1724;
-            --fg: #e6eef8;
-            --card: #0b1220;
-            --muted: #9aa6ba;
-        }
-
-        .container { max-width: 1150px; margin: 0 auto; }
-        .card {
-            background: var(--card);
-            padding: 14px;
-            border-radius: 10px;
-            box-shadow: 0 6px 18px rgba(10,10,10,0.06);
-            margin-bottom: 18px;
-        }
-
-        .controls { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
-        label { font-size: 0.9rem; color:var(--muted); }
-        input[type="text"], input[type="date"], select {
-            padding:8px 10px; border-radius:6px; border:1px solid #ddd;
-            background: transparent; color: var(--fg);
-        }
-
-        button { padding:8px 12px; border-radius:8px; border:none; cursor:pointer; }
-        .btn-primary { background:#2563eb; color:white; }
-        .btn-ghost { background:transparent; color:var(--fg); border:1px solid #ccc; }
-
-        #charts { display:grid; grid-template-columns:1fr; gap:12px; }
-        #precos, #volume, #rsi, #macd, #previsao { height: 420px; }
-
-        .small { font-size: 0.9rem; color:var(--muted); }
-    </style>
+   <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
 <div class="container" id="page">
@@ -121,6 +73,6 @@
     </div>
 </div>
 
-<script src="{{ url_for('static', filename='app.js') }}"></script>
+<script src="static/app.js"></script>
 </body>
 </html>
