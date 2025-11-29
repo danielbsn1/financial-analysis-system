@@ -9,6 +9,11 @@ async function buscarDados() {
 
     const body = { ticker, start, end, horizon };
 
+    fetch('/get_data', {method:"POST"})
+    .then(r=>r.json())
+    .then(data=>console.log("RETORNO:",data))
+    .catch(err=>console.error("ERRO FETCH:",err));
+    
     try {
         const res = await fetch('/get_data', {
             method: 'POST',

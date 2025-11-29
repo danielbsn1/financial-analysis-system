@@ -1,35 +1,80 @@
 from flask import Flask, render_template, request, jsonify, send_file
 import pandas as pd
 import numpy as np
-import yfinance as yf
 import datetime as dt
 from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import PolynomialFeatures
 import io
+import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+API_KEY = os.getenv('TWELVE_API_KEY')
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 
+# ======================================================
+# BAIXAR DADOS DA API
+# ======================================================
 def baixar_dados(ticker, start, end):
-    df = yf.download(ticker, start=start, end=end, progress=False)
-    if df.empty:
+    url = "https://api.twelvedata.com/time_series"
+    params = {
+        "symbol": ticker,
+        "interval": "1day",
+        "apikey": API_KEY,
+        "start_date": start,
+        "end_date": end,
+        "format": "JSON",
+        "outputsize": 5000
+    }
+
+    response = requests.get(url, params=params)
+    data = response.json()
+
+    if "status" in data and data["status"] == "error":
+        print("Erro da API:", data["message"])
         return None
+
+    if "values" not in data:
+        print("Resposta inválida:", data)
+        return None
+
+    df = pd.DataFrame(data["values"])
+    df["datetime"] = pd.to_datetime(df["datetime"])
+    df.sort_values("datetime", inplace=True)
+
+    numeric_cols = ["open", "high", "low", "close", "volume"]
+    for col in numeric_cols:
+        df[col] = pd.to_numeric(df[col])
+
+    df.rename(columns={
+        "open": "Open",
+        "high": "High",
+        "low": "Low",
+        "close": "Close",
+        "volume": "Volume",
+        "datetime": "Date"
+    }, inplace=True)
+
+    df.set_index("Date", inplace=True)
     return df
 
 
+# ======================================================
+# INDICADORES
+# ======================================================
 def calcular_indicadores(df):
     df = df.copy()
 
-    # EMAs
     df['EMA_12'] = df['Close'].ewm(span=12, adjust=False).mean()
     df['EMA_26'] = df['Close'].ewm(span=26, adjust=False).mean()
 
-    # SMAs
     df['SMA_20'] = df['Close'].rolling(window=20).mean()
     df['SMA_50'] = df['Close'].rolling(window=50).mean()
 
-    # RSI
     delta = df['Close'].diff()
     ganho = delta.clip(lower=0)
     perda = -delta.clip(upper=0)
@@ -38,26 +83,22 @@ def calcular_indicadores(df):
     rs = media_ganho / media_perda
     df['RSI'] = 100 - (100 / (1 + rs))
 
-    # MACD
     ema_12 = df['Close'].ewm(span=12, adjust=False).mean()
     ema_26 = df['Close'].ewm(span=26, adjust=False).mean()
     df['MACD'] = ema_12 - ema_26
     df['MACD_Signal'] = df['MACD'].ewm(span=9, adjust=False).mean()
 
-    # Bollinger
     df['Middle_Band'] = df['Close'].rolling(window=20).mean()
     std = df['Close'].rolling(window=20).std()
     df['Upper_Band'] = df['Middle_Band'] + (2 * std)
     df['Lower_Band'] = df['Middle_Band'] - (2 * std)
 
-    # ATR (Average True Range)
     high_low = df['High'] - df['Low']
     high_close = (df['High'] - df['Close'].shift()).abs()
     low_close = (df['Low'] - df['Close'].shift()).abs()
     tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
     df['ATR_14'] = tr.rolling(window=14).mean()
 
-    # OBV (On Balance Volume)
     obv = [0]
     for i in range(1, len(df)):
         if df['Close'].iloc[i] > df['Close'].iloc[i - 1]:
@@ -71,37 +112,38 @@ def calcular_indicadores(df):
     return df
 
 
+# ======================================================
+# PREVISÃO
+# ======================================================
 def prever_precos(df, dias_a_frente=30, grau=3):
-    """
-    Ajusta modelo polinomial no histórico e prevê 'dias_a_frente' dias.
-    Retorna df com coluna 'Pred' (predição in-sample) e um DataFrame futuro com datas & previsões.
-    """
     df = df.copy()
     df.index = pd.to_datetime(df.index)
-    dias = (df.index - df.index.min()).days
-    X = dias.reshape(-1, 1)
+
+    dias = (df.index - df.index.min()).days.values.reshape(-1, 1)
     y = df['Close'].values
 
     modelo = make_pipeline(PolynomialFeatures(degree=grau), LinearRegression())
-    modelo.fit(X, y)
+    modelo.fit(dias, y)
 
-    in_sample_preds = modelo.predict(X)
-    df['Pred'] = in_sample_preds
+    df['Pred'] = modelo.predict(dias)
 
     last_day = df.index.max()
-    future_dates = [last_day + dt.timedelta(days=int(i)) for i in range(1, dias_a_frente + 1)]
+    future_dates = [last_day + dt.timedelta(days=i) for i in range(1, dias_a_frente + 1)]
     future_days = np.array([(d - df.index.min()).days for d in future_dates]).reshape(-1, 1)
+
     future_preds = modelo.predict(future_days)
 
     future_df = pd.DataFrame({
         'Date': future_dates,
         'Pred': future_preds
     })
-    future_df['Date'] = future_df['Date'].dt.strftime('%Y-%m-%d')
 
     return df, future_df
 
 
+# ======================================================
+# ROTAS
+# ======================================================
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -109,76 +151,57 @@ def index():
 
 @app.route('/get_data', methods=['POST'])
 def get_data():
-    payload = request.get_json(force=True)
-    ticker = payload.get('ticker', '').upper().strip()
-    start = payload.get('start')
-    end = payload.get('end')
-    horizon = int(payload.get('horizon', 30))  # dias futuros: 7/30/60
-
-    if not ticker:
-        return jsonify({'error': 'Informe um ticker válido.'}), 400
-
     try:
-        df = baixar_dados(ticker, start, end)
-        if df is None:
-            return jsonify({'error': 'Ticker inválido ou sem dados no intervalo informado.'}), 404
+        payload = request.get_json()
 
-        df = calcular_indicadores(df)
-        df_with_preds, future_df = prever_precos(df, dias_a_frente=horizon, grau=3)
+        symbol = payload.get("symbol", "AAPL")
 
-        # Reset index e converter datas em string
-        out = df_with_preds.reset_index()
-        out['Date'] = out['Date'].dt.strftime('%Y-%m-%d')
+        url = "https://api.twelvedata.com/time_series"
+        params = {
+            "symbol": symbol,
+            "interval": "1day",
+            "apikey": API_KEY,
+            "outputsize": 30
+        }
 
-        records = out.to_dict(orient='records')
-        future_records = future_df.to_dict(orient='records')
+        response = requests.get(url, params=params)
+        result = response.json()
+
+        if "values" not in result:
+            return jsonify({"error": "Erro na API", "details": result})
 
         return jsonify({
-            'meta': {
-                'ticker': ticker,
-                'start': start,
-                'end': end,
-                'horizon': horizon
-            },
-            'data': records,
-            'future': future_records
+            "status": "ok",
+            "meta": result.get("meta", {}),
+            "values": result["values"]
         })
-
     except Exception as e:
-        return jsonify({'error': f'Erro ao processar: {str(e)}'}), 500
+        return jsonify({"error": str(e)})
 
 
 @app.route('/download', methods=['POST'])
 def download():
-    """
-    Recebe os mesmos parâmetros, gera arquivo Excel e retorna para download.
-    """
     payload = request.get_json(force=True)
     ticker = payload.get('ticker', '').upper().strip()
     start = payload.get('start')
     end = payload.get('end')
     horizon = int(payload.get('horizon', 30))
 
-    if not ticker:
-        return jsonify({'error': 'Informe um ticker válido.'}), 400
-
     df = baixar_dados(ticker, start, end)
     if df is None:
-        return jsonify({'error': 'Ticker inválido ou sem dados no intervalo informado.'}), 404
+        return jsonify({'error': 'Ticker inválido.'}), 404
 
     df = calcular_indicadores(df)
-    df_with_preds, future_df = prever_precos(df, dias_a_frente=horizon, grau=3)
+    df_with_preds, future_df = prever_precos(df, horizon)
 
-    # Escrever Excel em memória
     output = io.BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         df_with_preds.to_excel(writer, sheet_name='historico')
         future_df.to_excel(writer, sheet_name='previsao_futura', index=False)
-        writer.save()
 
     output.seek(0)
-    filename = f'{ticker}_data_{start}_to_{end}.xlsx'
-    return send_file(output, as_attachment=True, download_name=filename, mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    filename = f"{ticker}_data.xlsx"
+    return send_file(output, as_attachment=True, download_name=filename)
 
 
 if __name__ == '__main__':
