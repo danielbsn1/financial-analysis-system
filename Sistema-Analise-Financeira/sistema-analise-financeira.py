@@ -16,9 +16,9 @@ API_KEY = os.getenv('TWELVE_API_KEY')
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 
-# ======================================================
+
 # BAIXAR DADOS DA API
-# ======================================================
+
 def baixar_dados(ticker, start, end):
     url = "https://api.twelvedata.com/time_series"
     params = {
@@ -63,9 +63,9 @@ def baixar_dados(ticker, start, end):
     return df
 
 
-# ======================================================
+
 # INDICADORES
-# ======================================================
+
 def calcular_indicadores(df):
     df = df.copy()
 
@@ -112,9 +112,8 @@ def calcular_indicadores(df):
     return df
 
 
-# ======================================================
 # PREVISÃO
-# ======================================================
+
 def prever_precos(df, dias_a_frente=30, grau=3):
     df = df.copy()
     df.index = pd.to_datetime(df.index)
@@ -141,9 +140,9 @@ def prever_precos(df, dias_a_frente=30, grau=3):
     return df, future_df
 
 
-# ======================================================
+
 # ROTAS
-# ======================================================
+
 @app.route('/')
 def index():
     return render_template('index.html')
