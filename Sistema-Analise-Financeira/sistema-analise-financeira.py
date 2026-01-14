@@ -148,34 +148,73 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/get_data', methods=['POST'])
+@app.route('/data', methods=['POST'])
 def get_data():
     try:
         payload = request.get_json()
-
+        print(f"Payload recebido: {payload}")
+        print(f"API_KEY: {API_KEY}")
+        
         symbol = payload.get("symbol", "AAPL")
+        start = payload.get("start")
+        end = payload.get("end")
+        horizon = int(payload.get("horizon", 30))
+        
+        print(f"Parâmetros: symbol={symbol}, start={start}, end={end}, horizon={horizon}")
 
-        url = "https://api.twelvedata.com/time_series"
-        params = {
-            "symbol": symbol,
-            "interval": "1day",
-            "apikey": API_KEY,
-            "outputsize": 30
-        }
+        # Baixar dados históricos
+        df = baixar_dados(symbol, start, end)
+        if df is None:
+            return jsonify({"error": "Erro ao baixar dados do ticker"}), 400
 
-        response = requests.get(url, params=params)
-        result = response.json()
+        # Calcular indicadores
+        df = calcular_indicadores(df)
+        
+        # Fazer previsão
+        df_with_preds, future_df = prever_precos(df, horizon)
 
-        if "values" not in result:
-            return jsonify({"error": "Erro na API", "details": result})
+        # Preparar dados para o frontend
+        candles = []
+        for idx, row in df_with_preds.iterrows():
+            candles.append({
+                "Date": idx.strftime("%Y-%m-%d"),
+                "Open": float(row["Open"]),
+                "High": float(row["High"]),
+                "Low": float(row["Low"]),
+                "Close": float(row["Close"]),
+                "Volume": int(row["Volume"]),
+                "SMA_20": float(row["SMA_20"]) if pd.notna(row["SMA_20"]) else None,
+                "SMA_50": float(row["SMA_50"]) if pd.notna(row["SMA_50"]) else None,
+                "EMA_12": float(row["EMA_12"]) if pd.notna(row["EMA_12"]) else None,
+                "EMA_26": float(row["EMA_26"]) if pd.notna(row["EMA_26"]) else None,
+                "RSI": float(row["RSI"]) if pd.notna(row["RSI"]) else None,
+                "MACD": float(row["MACD"]) if pd.notna(row["MACD"]) else None,
+                "MACD_Signal": float(row["MACD_Signal"]) if pd.notna(row["MACD_Signal"]) else None,
+                "Upper_Band": float(row["Upper_Band"]) if pd.notna(row["Upper_Band"]) else None,
+                "Lower_Band": float(row["Lower_Band"]) if pd.notna(row["Lower_Band"]) else None,
+                "Pred": float(row["Pred"]) if pd.notna(row["Pred"]) else None
+            })
+
+        future_data = []
+        for idx, row in future_df.iterrows():
+            future_data.append({
+                "Date": row["Date"].strftime("%Y-%m-%d"),
+                "Pred": float(row["Pred"])
+            })
 
         return jsonify({
             "status": "ok",
-            "meta": result.get("meta", {}),
-            "values": result["values"]
+            "meta": {
+                "symbol": symbol,
+                "name": f"{symbol} Stock",
+                "horizon": horizon
+            },
+            "candles": candles,
+            "data": candles,  # Para compatibilidade
+            "future": future_data
         })
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route('/download', methods=['POST'])

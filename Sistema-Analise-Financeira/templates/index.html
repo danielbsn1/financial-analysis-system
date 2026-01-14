@@ -2,6 +2,9 @@
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="Dashboard Financeiro Avançado - Análise de Ações com Indicadores Técnicos">
+    <meta name="theme-color" content="#0f172a">
     <title>Dashboard Financeiro Avançado</title>
 
     <!-- Plotly (versão explícita) -->
@@ -10,66 +13,115 @@
 </head>
 <body>
 <div class="container" id="page">
-    <div class="card">
+    <div class="card header-card">
         <h2>📈 Dashboard Financeiro Avançado</h2>
+        <p class="subtitle">Análise técnica profissional com Machine Learning</p>
+    </div>
 
-        <div class="controls">
-            <div>
-                <label>Ticker</label><br>
-                <input type="text" id="ticker" value="AAPL">
+    <div class="card controls-card">
+        <div class="controls-grid">
+            <div class="control-group">
+                <label>Ticker</label>
+                <input type="text" id="ticker" value="AAPL" placeholder="Ex: AAPL, TSLA">
             </div>
 
-            <div>
-                <label>Início</label><br>
+            <div class="control-group">
+                <label>Data Início</label>
                 <input type="date" id="start" value="2020-01-01">
             </div>
 
-            <div>
-                <label>Fim</label><br>
+            <div class="control-group">
+                <label>Data Fim</label>
                 <input type="date" id="end" value="">
             </div>
 
-            <div>
-                <label>Horizonte (dias)</label><br>
+            <div class="control-group">
+                <label>Horizonte (dias)</label>
                 <select id="horizon">
-                    <option value="7">7</option>
-                    <option value="30" selected>30</option>
-                    <option value="60">60</option>
+                    <option value="7">7 dias</option>
+                    <option value="30" selected>30 dias</option>
+                    <option value="60">60 dias</option>
+                    <option value="90">90 dias</option>
                 </select>
-            </div>
-
-            <div>
-                <label>Indicadores</label><br>
-                <select id="indicator_select" multiple size="3" style="min-width:140px;">
-                    <option value="sma">SMA20 & SMA50</option>
-                    <option value="ema">EMA12 & EMA26</option>
-                    <option value="boll">Bollinger Bands</option>
-                    <option value="rsi">RSI</option>
-                    <option value="macd">MACD</option>
-                    <option value="atr">ATR</option>
-                    <option value="obv">OBV</option>
-                </select>
-            </div>
-
-            <div style="display:flex;flex-direction:column;gap:6px;">
-                <button class="btn-primary" onclick="buscarDados()">Buscar Dados</button>
-                <button class="btn-ghost" onclick="baixarExcel()">Download Excel</button>
-            </div>
-
-            <div style="margin-left:auto;">
-                <label>Tema</label><br>
-                <button onclick="toggleTheme()" class="btn-ghost">Toggle Dark</button>
             </div>
         </div>
-        <p class="small">Selecione múltiplos indicadores segurando Ctrl (ou Cmd) + clique.</p>
+
+        <div class="indicators-section">
+            <label>Indicadores Técnicos</label>
+            <div class="indicators-grid">
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="sma" checked>
+                    <span>SMA (20, 50)</span>
+                </label>
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="ema">
+                    <span>EMA (12, 26)</span>
+                </label>
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="boll" checked>
+                    <span>Bollinger Bands</span>
+                </label>
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="rsi" checked>
+                    <span>RSI</span>
+                </label>
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="macd" checked>
+                    <span>MACD</span>
+                </label>
+                <label class="indicator-checkbox">
+                    <input type="checkbox" value="atr">
+                    <span>ATR</span>
+                </label>
+            </div>
+        </div>
+
+        <div class="actions-grid">
+            <button class="btn-primary" onclick="buscarDados()">🔍 Buscar Dados</button>
+            <button class="btn-ghost" onclick="toggleTheme()">🌙 Tema</button>
+        </div>
     </div>
 
     <div id="charts">
-        <div class="card"><div id="precos"></div></div>
-        <div class="card"><div id="volume"></div></div>
-        <div class="card"><div id="rsi"></div></div>
-        <div class="card"><div id="macd"></div></div>
-        <div class="card"><div id="previsao"></div></div>
+        <div class="card chart-card">
+            <div class="chart-header">
+                <h3>📊 Preço e Indicadores</h3>
+                <span class="chart-subtitle">Candlestick com análise técnica</span>
+            </div>
+            <div id="precos"></div>
+        </div>
+        
+        <div class="card chart-card">
+            <div class="chart-header">
+                <h3>📈 Volume de Negociação</h3>
+                <span class="chart-subtitle">Volume diário</span>
+            </div>
+            <div id="volume"></div>
+        </div>
+        
+        <div class="card chart-card">
+            <div class="chart-header">
+                <h3>⚡ RSI - Força Relativa</h3>
+                <span class="chart-subtitle">Sobrecompra/Sobrevenda</span>
+            </div>
+            <div id="rsi"></div>
+        </div>
+        
+        <div class="card chart-card">
+            <div class="chart-header">
+                <h3>📉 MACD</h3>
+                <span class="chart-subtitle">Convergência/Divergência</span>
+            </div>
+            <div id="macd"></div>
+        </div>
+        
+        <div class="card chart-card">
+            <div class="chart-header">
+                <h3>🔮 Previsão de Preços</h3>
+                <span class="chart-subtitle">Machine Learning</span>
+            </div>
+            <div id="previsao"></div>
+        </div>
     </div>
 </div>
 <script src="{{ url_for('static', filename='app.js') }}"></script>
