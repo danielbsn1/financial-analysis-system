@@ -15,6 +15,9 @@ API_KEY = os.getenv('TWELVE_API_KEY')
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
+if __name__ == '__main__':
+    app.run(debug=True, port=5001)
+
 def calcular_indicadores(df):
     """Calcula indicadores técnicos reais"""
     # SMA
