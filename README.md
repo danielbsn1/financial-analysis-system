@@ -1,4 +1,4 @@
-# 📈 Sistema de Análise Financeira
+#  Sistema de Análise Financeira
 
 > Dashboard interativo para análise técnica de ações com indicadores avançados e previsões de preço usando Machine Learning.
 
@@ -6,20 +6,19 @@
 ![Flask](https://img.shields.io/badge/Flask-2.3.3-green.svg)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 
-## 🎯 Sobre o Projeto
+##  Sobre o Projeto
 
 Sistema web completo para análise de ações do mercado financeiro, desenvolvido com Python e Flask. Permite visualizar dados históricos, calcular indicadores técnicos em tempo real e fazer previsões de preço usando algoritmos de Machine Learning.
 
-### ✨ Funcionalidades
+###  Funcionalidades
 
-- 📊 **Gráficos Interativos** - Candlestick, volume e indicadores técnicos
-- 🔢 **10+ Indicadores Técnicos** - SMA, EMA, RSI, MACD, Bollinger Bands, Stochastic, Williams %R, CCI, ATR, OBV
-- 🤖 **Previsões com ML** - Regressão polinomial para previsão de preços
-- 📥 **Export Excel** - Relatórios formatados com dados históricos e previsões
-- 🎨 **Interface Moderna** - Design responsivo e tema dark/light
-- 📱 **Mobile Friendly** - Funciona perfeitamente em dispositivos móveis
+-  **Gráficos Interativos** - Candlestick, volume e indicadores técnicos
+-  **10+ Indicadores Técnicos** - SMA, EMA, RSI, MACD, Bollinger Bands, Stochastic, Williams %R, CCI, ATR, OBV
+-  **Previsões com ML** - Regressão polinomial para previsão de preços
+-  **Interface Moderna** - Design responsivo e tema dark/light
+-  **Mobile Friendly** - Funciona perfeitamente em dispositivos móveis
 
-## 🛠️ Tecnologias Utilizadas
+##  Tecnologias Utilizadas
 
 ### Backend
 - **Python 3.11+** - Linguagem principal
@@ -35,13 +34,13 @@ Sistema web completo para análise de ações do mercado financeiro, desenvolvid
 - **Plotly.js** - Visualização de dados
 - **Responsive Design** - Mobile-first
 
-## 📋 Pré-requisitos
+##  Pré-requisitos
 
 - Python 3.11 ou superior
 - pip (gerenciador de pacotes Python)
 - Conta gratuita na [TwelveData](https://twelvedata.com/) para API key
 
-## 🚀 Como Executar
+##  Como Executar
 
 ### 1. Clone o repositório
 ```bash
@@ -63,24 +62,6 @@ source venv/bin/activate
 ### 3. Instale as dependências
 ```bash
 pip install -r requirements.txt
-```
-
-### 4. Configure as variáveis de ambiente
-Crie um arquivo `.env` na pasta raiz:
-```env
-TWELVE_API_KEY=sua_chave_api_aqui
-FLASK_DEBUG=True
-SECRET_KEY=sua_chave_secreta_aqui
-```
-
-### 5. Execute a aplicação
-```bash
-python app_simples.py
-```
-
-### 6. Acesse no navegador
-```
-http://localhost:5001
 ```
 
 ## 📖 Como Usar
@@ -107,7 +88,7 @@ http://localhost:5001
 | **ATR** | Average True Range | Volatilidade |
 | **OBV** | On Balance Volume | Volume acumulado |
 
-## 🧪 Testes
+##  Testes
 
 ```bash
 # Executar testes unitários
@@ -117,7 +98,7 @@ python -m pytest tests/
 python -m pytest --cov=. tests/
 ```
 
-## 📁 Estrutura do Projeto
+##  Estrutura do Projeto
 
 ```
 Sistema-Analise-Financeira/
@@ -134,30 +115,19 @@ Sistema-Analise-Financeira/
 └── README.md           # Este arquivo
 ```
 
-## 🎓 Aprendizados
+##  Aprendizados
 
 Este projeto foi desenvolvido para demonstrar conhecimentos em:
 
-- ✅ Desenvolvimento web com Flask
-- ✅ Manipulação de dados com Pandas
-- ✅ Machine Learning com Scikit-learn
-- ✅ Integração com APIs REST
-- ✅ Visualização de dados
-- ✅ Design responsivo
-- ✅ Boas práticas de código
+-  Desenvolvimento web com Flask
+-  Manipulação de dados com Pandas
+-  Machine Learning com Scikit-learn
+-  Integração com APIs REST
+-  Visualização de dados
+- Design responsivo
+-  Boas práticas de código
 
-## 🔮 Próximas Melhorias
-
-- [ ] Autenticação de usuários
-- [ ] Salvar análises favoritas
-- [ ] Alertas de preço por email
-- [ ] Comparação entre múltiplas ações
-- [ ] Backtesting de estratégias
-- [ ] Deploy em produção (Heroku/AWS)
-- [ ] Testes automatizados (CI/CD)
-- [ ] Documentação da API (Swagger)
-
-## 🤝 Contribuindo
+##  Contribuindo
 
 Contribuições são bem-vindas! Sinta-se à vontade para:
 
@@ -167,19 +137,16 @@ Contribuições são bem-vindas! Sinta-se à vontade para:
 4. Push para a branch (`git push origin feature/NovaFuncionalidade`)
 5. Abrir um Pull Request
 
-## 📝 Licença
+##  Licença
 
 Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
-## 👤 Autor
+##  Autor
 
-**Seu Nome**
+**Daniel batista **
 
-- GitHub: [@seu-usuario](https://github.com/seu-usuario)
-- LinkedIn: [Seu Nome](https://linkedin.com/in/seu-perfil)
-- Email: seu.email@exemplo.com
 
-## 🙏 Agradecimentos
+##  Agradecimentos
 
 - [TwelveData](https://twelvedata.com/) - API de dados financeiros
 - [Plotly](https://plotly.com/) - Biblioteca de gráficos
@@ -187,6 +154,4 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ---
 
-⭐ Se este projeto te ajudou, considere dar uma estrela!
-
-**Desenvolvido com ❤️ e ☕**
+ Se este projeto te ajudou, considere dar uma estrela!
