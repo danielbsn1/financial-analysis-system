@@ -1,15 +1,14 @@
 {
-  "version": 2,
   "builds": [
     {
-      "src": "Sistema-Analise-Financeira/app_simples.py",
+      "src": "index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "Sistema-Analise-Financeira/app_simples.py"
+      "dest": "index.py"
     }
   ]
 }
